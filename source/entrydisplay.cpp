@@ -17,7 +17,12 @@ EntryDisplay::~EntryDisplay()
 
 bool EntryDisplay::IsCorrect()
 {
-    const bool is_correct = (answer_ == ui->answerLineEdit->text());
+    bool is_correct = false;
+
+    for(const auto& answer : answers_)
+    {
+        is_correct += (answer == ui->answerLineEdit->text());
+    }
 
     ui->answerLineEdit->setReadOnly(true);
     ui->answerLineEdit->setStyleSheet(is_correct ? "border: 1px solid green" : "border: 1px solid red");
@@ -25,7 +30,7 @@ bool EntryDisplay::IsCorrect()
     if(!is_correct)
     {
         QLabel *answerLabel = new QLabel(this);
-        answerLabel->setText(answer_);
+        answerLabel->setText(std::accumulate(answers_.begin(), answers_.end(), QString(" ")));
         answerLabel->setStyleSheet("color: red");
 
         ui->formLayout->addWidget(answerLabel);
@@ -34,9 +39,9 @@ bool EntryDisplay::IsCorrect()
     return is_correct;
 }
 
-void EntryDisplay::SetAnswer(const QString& answer)
+void EntryDisplay::SetAnswers(const std::vector<QString>& answers)
 {
-    answer_ = answer;
+    answers_ = answers;
     return;
 }
 

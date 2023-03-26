@@ -12,25 +12,25 @@ public:
     {
         QString name_;
         QString instructions_;
-        std::vector<EntryModel> entries_;
+        std::vector<sEntryModel> entries_;
     };
 
     static size_t Merge(
-        const QString &dir_path,
-        const QString &file_path,
-        QString &error_msg
+        const QString& dir_path,
+        const QString& file_path,
+        QString& error_msg
     );
 
     static bool Load(
-        const QString &fpath,
+        const QString& fpath,
         sListData& data,
-        QString &error_msg
+        QString& error_msg
     );
 
     static bool Save(
-        const QString &fpath,
+        const QString& fpath,
         sListData& data,
-        QString &error_msg
+        QString& error_msg
     );
 
 private:
@@ -40,8 +40,8 @@ private:
     static const QString json_name_str_;
     static const QString json_instructions_str_;
     static const QString json_entries_str_;
-    static const QString json_question_str_;
-    static const QString json_answer_str_;
+    static const QString json_questions_str_;
+    static const QString json_answers_str_;
     static const QString json_hint_str_;
 };
 

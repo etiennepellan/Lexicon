@@ -22,14 +22,14 @@ class EntryDisplay : public QWidget
         ~EntryDisplay();
 
         bool IsCorrect(void);
-        void SetAnswer(const QString &answer);
-        void SetHint(const QString &hint);
+        void SetAnswers(const std::vector<QString>& answer);
+        void SetHint(const QString& hint);
         void SetQuestion(const QString& question);
 
     private:
 
         Ui::EntryDisplay *ui;
-        QString answer_;
+        std::vector<QString> answers_;
 };
 
 #endif // ENTRYDISPLAY_H

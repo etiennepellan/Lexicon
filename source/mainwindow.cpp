@@ -81,41 +81,46 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::DisplayEntries()
 {
-    std::vector<EntryModel> entries = entries_; // local copy needed for randomization bellow
+    std::vector<sEntryModel> entries = entries_; // local copy needed for randomization bellow
     const size_t entries_max_display = settings_.GetEntriesMaximum();
     const size_t entries_size = entries.size();
     const size_t entries_displayed_count = (entries_size > entries_max_display) ? entries_max_display : entries_size; // display the maximum number of entries wanted by the user
 
     for(size_t i = 0; i < entries_displayed_count; i++)
     {
-        EntryModel entry;
+        size_t random_int;
+        sEntryModel entry;
 
         if(settings_.IsOrderShuffleEnabled())
         {
-            const size_t random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, static_cast<int>(entries.size()))); // needs to be entries.size() because of the progressive erasing of vector
+            random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, static_cast<int>(entries.size()))); // needs to be entries.size() because of the progressive erasing of vector
 
             entry = entries.at(random_int);
             entries.erase(entries.begin() + long(random_int));
         }
-
         else entry = entries.at(i);
+
+        // picking a random question from entry
+        random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, static_cast<int>(entry.questions_.size())));
+
+        EntryDisplay *entry_display = new EntryDisplay(this);
+        entry_display->SetHint("<i>" + entry.hint_ + "<\\i>");
+        entry_display->SetQuestion(entry.questions_.at(random_int));
+        entry_display->SetAnswers(entry.answers_);
 
         if(settings_.IsSideShuffleEnabled())
         {
-            const size_t random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, 2));
+            random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, 2));
 
+            // if randomized, questions become answers and vice versa
             if(random_int)
             {
-                const QString tmp = entry.GetQuestion();
-                entry.SetQuestion(entry.GetAnswer());
-                entry.SetAnswer(tmp);
+                // picking a random answer from entry
+                random_int = static_cast<size_t>(QRandomGenerator::global()->bounded(0, static_cast<int>(entry.answers_.size())));
+                entry_display->SetQuestion(entry.answers_.at(random_int));
+                entry_display->SetAnswers(entry.questions_);
             }
         }
-
-        EntryDisplay *entry_display = new EntryDisplay(this);
-        entry_display->SetQuestion(entry.GetQuestion());
-        entry_display->SetAnswer(entry.GetAnswer());
-        entry_display->SetHint("<i>" + entry.GetHint() + "<\\i>");
 
         ui->entriesLayout->addWidget(entry_display);
     }

@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
         Settings settings_;
         ListEdit list_edit_;
         About about_;
-        std::vector<EntryModel> entries_;
+        std::vector<sEntryModel> entries_;
         bool test_in_progress_;
         QElapsedTimer timer_;
         QTimer interval_timer_;

@@ -9,8 +9,8 @@
 const QString ListIO::json_name_str_ = "name";
 const QString ListIO::json_instructions_str_ = "instructions";
 const QString ListIO::json_entries_str_ = "entries";
-const QString ListIO::json_question_str_ = "question";
-const QString ListIO::json_answer_str_ = "answer";
+const QString ListIO::json_questions_str_ = "questions";
+const QString ListIO::json_answers_str_ = "answers";
 const QString ListIO::json_hint_str_ = "hint";
 
 ListIO::ListIO() {}
@@ -51,10 +51,7 @@ size_t ListIO::Merge(
     return merged_lists;
 }
 
-bool ListIO::Load(
-        const QString &fpath,
-        sListData &data,
-        QString &error_msg)
+bool ListIO::Load(const QString &fpath, sListData &data, QString &error_msg)
 {
     if(!fpath.isEmpty())
     {
@@ -91,24 +88,41 @@ bool ListIO::Load(
 
                 QJsonArray json_entries_array = json_content.value(json_entries_str_).toArray();
 
-                const size_t array_size = json_entries_array.size();
+                const size_t json_entries_count = json_entries_array.size();
 
-                for(size_t i = 0; i < array_size; i++)
+                for(size_t i = 0; i < json_entries_count; ++i)
                 {
                     QJsonObject entry_obj = json_entries_array.at(i).toObject();
 
-                    if( !entry_obj.contains(json_question_str_) ||
-                        !entry_obj.contains(json_answer_str_) ||
+                    if( !entry_obj.contains(json_questions_str_) ||
+                        !entry_obj.contains(json_answers_str_) ||
                         !entry_obj.contains(json_hint_str_))
                     {
                         error_msg += "List has one or several invalid entries\r\n";
                         return false;
                     }
 
-                    EntryModel entry;
-                    entry.SetQuestion(entry_obj.value(json_question_str_).toString());
-                    entry.SetAnswer(entry_obj.value(json_answer_str_).toString());
-                    entry.SetHint(entry_obj.value(json_hint_str_).toString());
+                    sEntryModel entry;
+                    entry.hint_ = entry_obj.value(json_hint_str_).toString();
+
+                    const QJsonArray entry_questions_array = entry_obj.value(json_questions_str_).toArray();
+                    const size_t entry_questions_count = entry_questions_array.size();
+
+                    for(size_t i = 0; i < entry_questions_count; ++i)
+                    {
+                        const QString question = entry_questions_array.at(i).toString();
+                        entry.questions_.push_back(question);
+                    }
+
+                    const QJsonArray entry_answers_array = entry_obj.value(json_questions_str_).toArray();
+                    const size_t entry_answers_count = entry_answers_array.size();
+
+                    for(size_t i = 0; i < entry_answers_count; ++i)
+                    {
+                        const QString answer = entry_answers_array.at(i).toString();
+                        entry.questions_.push_back(answer);
+                    }
+
                     data.entries_.push_back(entry);
                 }
             }
@@ -131,26 +145,41 @@ bool ListIO::Save(
 {
     if(!fpath.isEmpty())
     {
-        QJsonDocument json_doc;
-        QJsonObject json_content;
-        QJsonArray json_array;
+        QJsonArray json_entry_array;
 
         for(const auto& entry : data.entries_)
         {
-            QJsonObject json_entry;
-            json_entry.insert(json_question_str_, entry.GetQuestion());
-            json_entry.insert(json_answer_str_, entry.GetAnswer());
-            json_entry.insert(json_hint_str_, entry.GetHint());
+            QJsonArray json_entry_questions;
 
-            json_array.append(json_entry);
+            for(const auto& question : entry.questions_)
+            {
+                json_entry_questions.append(question);
+            }
+
+            QJsonArray json_entry_answers;
+
+            for(const auto& answer : entry.answers_)
+            {
+                json_entry_answers.append(answer);
+            }
+
+            QJsonObject json_entry;
+            json_entry.insert(json_questions_str_, json_entry_questions);
+            json_entry.insert(json_answers_str_, json_entry_answers);
+            json_entry.insert(json_hint_str_, entry.hint_);
+
+            json_entry_array.append(json_entry);
         }
 
+        QJsonObject json_content;
         json_content.insert(json_name_str_, data.name_);
         json_content.insert(json_instructions_str_, data.instructions_);
-        json_content.insert(json_entries_str_, json_array);
+        json_content.insert(json_entries_str_, json_entry_array);
+
+        QJsonDocument json_doc;
         json_doc.setObject(json_content);
 
-        QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
+        const QByteArray bytes = json_doc.toJson(QJsonDocument::Indented);
 
         QFile file(fpath);
 

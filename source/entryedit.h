@@ -16,22 +16,22 @@ class EntryEdit : public QWidget
 public:
 
     EntryEdit();
-    EntryEdit(EntryModel& model);
+    EntryEdit(const sEntryModel& model);
     ~EntryEdit();
 
-    const QString GetAnswer(void) const;
+    const std::vector<QString> GetAnswers() const;
     const QString GetHint(void) const;
-    const QString GetQuestion(void) const;
+    const std::vector<QString> GetQuestions() const;
     void InitAsListEditEntry(ListEdit *list_edit);
     bool IsChecked(void) const;
     bool IsValid(void) const;
-    void SetAnswer(const QString& answer);
+    void SetAnswers(const std::vector<QString>& answers);
     void SetChecked(bool checked);
     void SetHint(const QString& hint);
-    void SetQuestion(const QString& question);
+    void SetQuestions(const std::vector<QString>& questions);
 
-    EntryModel GetModel() const;
-    void SetModel(const EntryModel& model);
+    sEntryModel GetModel() const;
+    void SetModel(const sEntryModel& model);
 
 private:
 
@@ -40,10 +40,17 @@ private:
 
 private:
 
-    void SetEntryStyle(void);
+    void ClearQuestions();
+    void ClearAnswers();
+    void SetEntryStyle();
+    void ViewChanged();
 
 private slots:
 
+    void slAddAnswer();
+    void slAddQuestion();
+    void slRemoveAnswer();
+    void slRemoveQuestion();
     void slCheckValidity(void);
 };
 
